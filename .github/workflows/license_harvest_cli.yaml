@@ -1,0 +1,25 @@
+name: license_harvest_cli
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/license_harvest_cli.yaml"
+      - "lib/**"
+      - "test/**"
+      - "pubspec.yaml"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/license_harvest_cli.yaml"
+      - "lib/**"
+      - "test/**"
+      - "pubspec.yaml"
+
+jobs:
+  build:
+    uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/dart_package.yml@v1

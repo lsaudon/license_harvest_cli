@@ -1,0 +1,24 @@
+name: license_harvest_cli
+description: A Command-Line Interface for report all licenses of dependencies
+version: 0.0.1
+homepage: https://github.com/lsaudon/license_harvest_cli
+repository: https://github.com/lsaudon/license_harvest_cli
+issue_tracker: https://github.com/lsaudon/license_harvest_cli/issues
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  args: ^2.4.2
+  cli_completion: ^0.3.0
+  file: ^7.0.0
+  mason_logger: ^0.2.7
+  pana: ^0.21.34  
+  path: ^1.8.3
+
+dev_dependencies:
+  mocktail: ^0.3.0
+  test: ^1.24.4
+
+executables:
+  license_harvest:
