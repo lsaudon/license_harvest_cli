@@ -1,5 +1,14 @@
-const String feAnalyzerSharedRootUri =
+import 'dart:io';
+
+const String feAnalyzerSharedRootUriWindows =
     'file:///C:/Users/name/AppData/Local/Pub/Cache/hosted/pub.dev/_fe_analyzer_shared-62.0.0';
+const String feAnalyzerSharedRootUriMacOs =
+    'file:///Users/name/.pub-cache/hosted/pub.dev/_fe_analyzer_shared-62.0.0';
+
+String feAnalyzerSharedRootUri = Platform.isWindows
+    ? feAnalyzerSharedRootUriWindows
+    : feAnalyzerSharedRootUriMacOs;
+
 const String feAnalyzerSharedLicense = '''
 Copyright 2019, the Dart project authors.
 
@@ -29,13 +38,13 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''';
 
-const String packageConfigJsonContent = '''
+String packageConfigJsonContent = '''
 {
   "configVersion": 2,
   "packages": [
     {
       "name": "_fe_analyzer_shared",
-      "rootUri": "$feAnalyzerSharedRootUri",
+      "rootUri": "${Platform.isWindows ? feAnalyzerSharedRootUriWindows : feAnalyzerSharedRootUriMacOs}",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },

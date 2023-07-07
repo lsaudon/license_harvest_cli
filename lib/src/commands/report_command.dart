@@ -72,16 +72,17 @@ class ReportCommand extends Command<int> {
         .map(
           (final MapEntry<String, Uri> e) =>
               MapEntry<String, File>(e.key, _fileSystem.file(e.value)),
-        );
+        )
+        .where((final MapEntry<String, File> e) => e.value.existsSync());
     for (final MapEntry<String, File> element in collection) {
-      final List<License> list = await detectLicenseInFile(
+      final String licenses = (await detectLicenseInFile(
         element.value.absolute,
         relativePath: element.value.path,
-      );
-      final String licenses =
-          list.map((final License e) => e.spdxIdentifier).reduce(
-                (final String value, final String element) => '$value,$element',
-              );
+      ))
+          .map((final License e) => e.spdxIdentifier)
+          .reduce(
+            (final String value, final String element) => '$value,$element',
+          );
       _logger.info(
         '${element.key};$licenses;https://pub.dev/packages/${element.key}/license',
       );
