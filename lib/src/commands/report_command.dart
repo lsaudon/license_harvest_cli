@@ -10,13 +10,11 @@ import 'package:pana/src/license.dart';
 import 'package:pana/src/model.dart';
 import 'package:path/path.dart' as p;
 
-/// {@template report_command}
-///
-/// `license_harvest report`
 /// A [Command] to exemplify a sub command
-/// {@endtemplate}
+///
+/// This command reports licenses.
 class ReportCommand extends Command<int> {
-  /// {@macro report_command}
+  /// Constructs a [ReportCommand] with the specified [logger] and [fileSystem].
   ReportCommand({
     required final Logger logger,
     required final FileSystem fileSystem,
@@ -29,7 +27,7 @@ class ReportCommand extends Command<int> {
   @override
   String get description => 'Report licenses';
 
-  /// commandName
+  /// The name of the command.
   static const String commandName = 'report';
 
   @override
@@ -40,18 +38,38 @@ class ReportCommand extends Command<int> {
   @override
   Future<int> run() async {
     _logger.info('name;licenses;url_license');
-    final Iterable<MapEntry<String, File>> collection = ((jsonDecode(
-      await _fileSystem
-          .file(
-            p.join(
-              _fileSystem.currentDirectory.path,
-              argResults!.rest.isNotEmpty ? argResults?.rest.first : '',
-              '.dart_tool',
-              _packageConfigJsonName,
-            ),
-          )
-          .readAsString(),
-    ) as Map<String, dynamic>)['packages'] as List<dynamic>)
+    final Iterable<MapEntry<String, File>> packageFiles =
+        await _getPackageFiles();
+    for (final MapEntry<String, File> e in packageFiles) {
+      final String licenses = await _getLicenses(e.value);
+      _logger
+          .info('${e.key};$licenses;https://pub.dev/packages/${e.key}/license');
+    }
+    return ExitCode.success.code;
+  }
+
+  Future<String> _getLicenses(final File file) async {
+    final List<License> licenses =
+        await detectLicenseInFile(file.absolute, relativePath: file.path);
+    return licenses.map((final License e) => e.spdxIdentifier).join(',');
+  }
+
+  Future<Iterable<MapEntry<String, File>>> _getPackageFiles() async {
+    final String packageConfigPath = p.join(
+      _fileSystem.currentDirectory.path,
+      argResults!.rest.isNotEmpty ? argResults?.rest.first : '',
+      '.dart_tool',
+      _packageConfigJsonName,
+    );
+    final String packageConfigContent =
+        await _fileSystem.file(packageConfigPath).readAsString();
+
+    final Map<String, dynamic> packageConfigJson =
+        jsonDecode(packageConfigContent) as Map<String, dynamic>;
+    final List<dynamic> packages =
+        packageConfigJson['packages'] as List<dynamic>;
+
+    return packages
         .cast<Map<String, dynamic>>()
         .map(
           (final Map<String, dynamic> e) => MapEntry<String, String>(
@@ -60,8 +78,7 @@ class ReportCommand extends Command<int> {
           ),
         )
         .where(
-          (final MapEntry<String, String> element) =>
-              element.value.startsWith('file:///'),
+          (final MapEntry<String, String> e) => e.value.startsWith('file:///'),
         )
         .map(
           (final MapEntry<String, String> e) => MapEntry<String, Uri>(
@@ -74,19 +91,5 @@ class ReportCommand extends Command<int> {
               MapEntry<String, File>(e.key, _fileSystem.file(e.value)),
         )
         .where((final MapEntry<String, File> e) => e.value.existsSync());
-    for (final MapEntry<String, File> element in collection) {
-      final String licenses = (await detectLicenseInFile(
-        element.value.absolute,
-        relativePath: element.value.path,
-      ))
-          .map((final License e) => e.spdxIdentifier)
-          .reduce(
-            (final String value, final String element) => '$value,$element',
-          );
-      _logger.info(
-        '${element.key};$licenses;https://pub.dev/packages/${element.key}/license',
-      );
-    }
-    return ExitCode.success.code;
   }
 }
