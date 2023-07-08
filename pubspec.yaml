@@ -1,6 +1,6 @@
 name: license_harvest_cli
 description: A Command-Line Interface for report all licenses of dependencies
-version: 0.0.1
+version: 0.0.2
 homepage: https://github.com/lsaudon/license_harvest_cli
 repository: https://github.com/lsaudon/license_harvest_cli
 issue_tracker: https://github.com/lsaudon/license_harvest_cli/issues
